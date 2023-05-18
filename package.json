@@ -1,0 +1,33 @@
+{
+  "name": "fymbot-2023-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -r dist && tsc",
+    "start": "tsc && node dist",
+    "deploy-commands": "tsc && node deploy-commands.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fymmit/fymbot-2023-node.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fymmit/fymbot-2023-node/issues"
+  },
+  "homepage": "https://github.com/fymmit/fymbot-2023-node#readme",
+  "devDependencies": {
+    "@types/node": "^20.2.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "discord.js": "^14.11.0",
+    "dotenv": "^16.0.3",
+    "node-fetch": "^3.3.1"
+  }
+}
