@@ -1,28 +1,60 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction } from 'discord.js';
 import fetch from 'node-fetch';
+
+const baseUrl = 'https://fympix.com';
 
 const data = new SlashCommandBuilder()
     .setName('fympix')
     .setDescription('Fetches images from fympix')
     .addStringOption(option =>
         option
-            .setName('tag')
-            .setDescription('Tag(s) to search for (space separated)'));
+            .setName('query')
+            .setDescription('Tag(s) to search for (space separated)')
+            // .setAutocomplete(true)
+        );
 
 const execute = async (interaction: ChatInputCommandInteraction) => {
-    const tagOption = interaction.options.getString('tag') ?? '';
-    const tags = tagOption.split(' ');
+    // const image = interaction.options.getString('query');
+    await interaction.deferReply();
+    const queryOption = interaction.options.getString('query') ?? '';
+    const tags = queryOption.split(' ');
     const query = '?tags=' + tags.join('&tags=');
     const url = 'https://fympix.com/api/images' + query;
+
 
     const res = await fetch(url);
     const images = await res.json() as { name: string }[];
 
-    const random = Math.floor(Math.random() * images.length);
-    const image = images[random].name;
+    if (images.length === 0) {
+        await interaction.reply('No images found.');
+    } else {
+        const random = Math.floor(Math.random() * images.length);
+        const image = images[random].name;
 
-    const baseUrl = 'https://fympix.com';
-    await interaction.reply(`${baseUrl}/${image}`);
+
+        await interaction.editReply(`${baseUrl}/${image}`);
+        // await interaction.reply(`${baseUrl}/${image}`);
+    }
 }
 
-export default { data, execute };
+const autocomplete = async (interaction: AutocompleteInteraction) => {
+    const queryOption = interaction.options.getString('query') ?? '';
+    const tags = queryOption.split(' ');
+    const query = '?tags=' + tags.join('&tags=');
+    const url = 'https://fympix.com/api/images' + query;
+
+    const res = await fetch(url);
+    const data = await res.json() as { name: string }[];
+
+    const images = data.length >= 25 ? data.slice(0, 25) : data;
+
+    await interaction.respond(
+        images.map(i => ({ name: `${baseUrl}/${i.name}`, value: `${baseUrl}/${i.name}` }))
+    );
+}
+
+export default {
+    data,
+    execute,
+    // autocomplete
+};

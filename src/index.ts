@@ -1,4 +1,14 @@
-import { Client, Events, GatewayIntentBits, Message, TextChannel, Collection } from 'discord.js';
+import {
+    Client,
+    Events,
+    GatewayIntentBits,
+    Message,
+    TextChannel,
+    Collection,
+    CategoryChannelResolvable,
+    ChannelType,
+    ModalBuilder
+} from 'discord.js';
 import { config } from 'dotenv';
 import { timestamp } from './utils/datetimeUtils.js';
 import commands from './commands/index.js';
@@ -13,6 +23,7 @@ const client = new Client({ intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildVoiceStates,
 ] }) as GigaClient;
 
 client.commands = new Collection();
@@ -36,25 +47,74 @@ client.on(Events.MessageCreate, msg => {
 });
 
 client.on(Events.InteractionCreate, async interaction => {
-    if (!interaction.isChatInputCommand()) return;
-
     const c = interaction.client as GigaClient;
-    const command = c.commands.get(interaction.commandName);
+    if (interaction.isChatInputCommand()) {
+        const command = c.commands.get(interaction.commandName);
 
-    const author = interaction.user.username;
-    const channelName = interaction.channel.name;
-    console.log(`#${channelName} ${timestamp()} ${author}: (cmd) /${interaction.commandName}`);
+        const author = interaction.user.username;
+        const channelName = interaction.channel.name;
+        console.log(`#${channelName} ${timestamp()} ${author}: (cmd) /${interaction.commandName}`);
 
-    try {
-        await command.execute(interaction);
-    } catch (error) {
-		console.error(error);
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-		} else {
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-		}
-	}
+        try {
+            await command.execute(interaction);
+        } catch (error) {
+            console.error(error);
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+            } else {
+                await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+            }
+        }
+    } else if (interaction.isAutocomplete()) {
+        const command = c.commands.get(interaction.commandName);
+
+        await command.autocomplete(interaction);
+
+    } else {
+        return;
+    }
+});
+
+client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
+    const dynamicId = '1073933883499880460';
+    const oldChannel = oldState.channel;
+    const newChannel = newState.channel;
+
+    const channelToFetchFrom = newChannel ?? oldChannel;
+    const guild = channelToFetchFrom.guild;
+
+    if (oldChannel && oldChannel.parentId === dynamicId) {
+        const channels = (await guild.channels.fetch())
+            .filter(x => x.parentId === dynamicId);
+        if (channels.size > 1 && oldChannel.members.size === 0) {
+            await channels.get(oldChannel.id).delete();
+            channels.delete(oldChannel.id);
+            if (channels.size === 1) {
+                await channels.at(0).edit({
+                    name: '1'
+                });
+            }
+        }
+    }
+    if (newChannel && newChannel.parentId === dynamicId) {
+        const channels = (await guild.channels.fetch())
+            .filter(x => x.parentId === dynamicId);
+        let channelsWithPeopleCount = 0;
+        for (const item of channels) {
+            const channel = item[1];
+            if (channel.members.size > 0) {
+                channelsWithPeopleCount++;
+            }
+        }
+        if (channelsWithPeopleCount === channels.size) {
+            const name = `${Number(channels.at(channels.size - 1).name) + 1}`;
+            await guild.channels.create({
+                name,
+                type: ChannelType.GuildVoice,
+                parent: newChannel.parent
+            });
+        }
+    }
 });
 
 client.login(TOKEN);
