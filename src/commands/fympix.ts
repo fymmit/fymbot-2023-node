@@ -10,11 +10,9 @@ const data = new SlashCommandBuilder()
         option
             .setName('query')
             .setDescription('Tag(s) to search for (space separated)')
-            // .setAutocomplete(true)
         );
 
 const execute = async (interaction: ChatInputCommandInteraction) => {
-    // const image = interaction.options.getString('query');
     await interaction.deferReply();
     const queryOption = interaction.options.getString('query') ?? '';
     const tags = queryOption.split(' ');
@@ -26,7 +24,7 @@ const execute = async (interaction: ChatInputCommandInteraction) => {
     const images = await res.json() as { name: string }[];
 
     if (images.length === 0) {
-        await interaction.reply('No images found.');
+        await interaction.editReply('No images found.');
     } else {
         const random = Math.floor(Math.random() * images.length);
         const image = images[random].name;
