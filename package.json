@@ -28,6 +28,8 @@
   "dependencies": {
     "discord.js": "^14.11.0",
     "dotenv": "^16.0.3",
+    "form-data-encoder": "^3.0.0",
+    "formdata-node": "^5.0.0",
     "node-fetch": "^3.3.1",
     "tesseract.js": "^4.0.6"
   }

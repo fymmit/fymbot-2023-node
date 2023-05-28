@@ -14,7 +14,7 @@ const execute = async (interaction: ChatInputCommandInteraction) => {
     await interaction.deferReply();
     const attachment = interaction.options.getAttachment('image');
     if (attachment.contentType.split('/')[0] !== 'image') {
-        await interaction.editReply('Not an image.');
+        await interaction.followUp({ content: 'Not an image.', ephemeral: true });
     }
 
     const worker = await createWorker({});
