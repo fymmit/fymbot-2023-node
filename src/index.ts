@@ -2,16 +2,14 @@ import {
     Client,
     Events,
     GatewayIntentBits,
-    Message,
-    TextChannel,
     Collection,
-    CategoryChannelResolvable,
     ChannelType,
-    ModalBuilder
 } from 'discord.js';
 import { config } from 'dotenv';
 import { timestamp } from './utils/datetimeUtils.js';
 import commands from './commands/index.js';
+import pg from 'pg';
+import handleMessage from './handlers/messagehandler.js';
 
 config();
 
@@ -34,16 +32,14 @@ for (const cmd of commands) {
     }
 }
 
+const pool = new pg.Pool();
+
 client.once(Events.ClientReady, c => {
     console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
-client.on(Events.MessageCreate, msg => {
-    const author = msg.author.username;
-    const { name: channelName } = msg.channel as TextChannel;
-    const content = msg.content;
-
-    console.log(`#${channelName} ${timestamp()} ${author}: ${content}`);
+client.on(Events.MessageCreate, async msg => {
+    await handleMessage(msg, pool);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
