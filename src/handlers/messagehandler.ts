@@ -1,8 +1,8 @@
 import { Message, TextChannel } from 'discord.js';
 import { timestamp } from '../utils/datetimeUtils.js';
-import pg from 'pg';
+import { pool } from '../index.js';
 
-const handle = async (msg: Message, pool: pg.Pool) => {
+const handle = async (msg: Message) => {
     const author = msg.author.username;
     const { name: channel } = msg.channel as TextChannel;
     const content = msg.content;

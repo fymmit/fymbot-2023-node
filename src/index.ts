@@ -32,14 +32,14 @@ for (const cmd of commands) {
     }
 }
 
-const pool = new pg.Pool();
+export const pool = new pg.Pool();
 
 client.once(Events.ClientReady, c => {
     console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
 client.on(Events.MessageCreate, async msg => {
-    await handleMessage(msg, pool);
+    await handleMessage(msg);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
