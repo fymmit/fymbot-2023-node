@@ -16,21 +16,26 @@ const execute = async (interaction: ChatInputCommandInteraction) => {
         text: `
             select author, count(*) c
             from message m
-            where lower(author) not like lower('%bot%')
             group by author
             order by c desc;`,
         rowMode: 'array'
     };
-    const result = await pool.query(query);
+    const { rows } = await pool.query(query);
 
-    console.log(result.rows);
+    const longestRow = rows.sort((a, b) => `${b[0]}${b[1]}`.length - `${a[0]}${a[1]}`.length)[0];
+    const longestRowLength = `${longestRow[0]}${longestRow[1]}`.length;
 
-
+    const messageStats = rows.map(([name, value]) => {
+        let spaceAmount = longestRowLength - `${name}${value}`.length;
+        if (spaceAmount !== 0) spaceAmount++;
+        const rowValue = `\`\`${name}: ${new Array(spaceAmount).join(' ')}${value}\`\``;
+        return rowValue;
+    }).join('\r\n');
 
     const embed = new EmbedBuilder()
         .setTitle('Stats')
         .addFields(
-            result.rows.map(r => ({ name: r[0], value: r[1] }))
+            { name: 'Message stats', value: messageStats }
         )
         .setTimestamp();
     await interaction.editReply({ embeds: [embed] });
