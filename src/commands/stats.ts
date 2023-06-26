@@ -22,7 +22,7 @@ const execute = async (interaction: ChatInputCommandInteraction) => {
     };
     const { rows } = await pool.query(query);
 
-    const longestRow = rows.sort((a, b) => `${b[0]}${b[1]}`.length - `${a[0]}${a[1]}`.length)[0];
+    const longestRow = [...rows].sort((a, b) => `${b[0]}${b[1]}`.length - `${a[0]}${a[1]}`.length)[0];
     const longestRowLength = `${longestRow[0]}${longestRow[1]}`.length;
 
     const messageStats = rows.map(([name, value]) => {
