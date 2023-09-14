@@ -13,7 +13,12 @@ import handleMessage from './handlers/messagehandler.js';
 
 config();
 
-const { TOKEN } = process.env;
+const {
+    TOKEN,
+    TOKEN_TEST,
+    PGDATABASE,
+    PGDATABASE_TEST,
+} = process.env;
 
 type GigaClient = Client & { commands: any }
 
@@ -32,7 +37,9 @@ for (const cmd of commands) {
     }
 }
 
-export const pool = new pg.Pool();
+export const pool = new pg.Pool(
+    { database: PGDATABASE_TEST ?? PGDATABASE }
+);
 
 client.once(Events.ClientReady, c => {
     console.log(`Ready! Logged in as ${c.user.tag}`);
@@ -113,4 +120,4 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
     }
 });
 
-client.login(TOKEN);
+client.login(TOKEN_TEST ?? TOKEN);
