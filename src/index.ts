@@ -10,6 +10,7 @@ import { timestamp } from './utils/datetimeUtils.js';
 import commands from './commands/index.js';
 import pg from 'pg';
 import handleMessage from './handlers/messagehandler.js';
+import { register } from './jobs/weather.js';
 
 config();
 
@@ -18,6 +19,9 @@ const {
     TOKEN_TEST,
     PGDATABASE,
     PGDATABASE_TEST,
+    WEATHER_APIKEY,
+    ANNOUNCEMENT_CHANNEL,
+    ANNOUNCEMENT_CHANNEL_TEST
 } = process.env;
 
 type GigaClient = Client & { commands: any }
@@ -41,8 +45,10 @@ export const pool = new pg.Pool(
     { database: PGDATABASE_TEST ?? PGDATABASE }
 );
 
-client.once(Events.ClientReady, c => {
+client.once(Events.ClientReady, async c => {
     console.log(`Ready! Logged in as ${c.user.tag}`);
+
+    register(c, ANNOUNCEMENT_CHANNEL_TEST ?? ANNOUNCEMENT_CHANNEL, WEATHER_APIKEY);
 });
 
 client.on(Events.MessageCreate, async msg => {
@@ -56,7 +62,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
         const author = interaction.user.username;
         const channelName = interaction.channel.name;
-        console.log(`#${channelName} ${timestamp()} ${author}: (cmd) /${interaction.commandName}`);
+        console.log(`#${channelName} ${timestamp(true)} ${author}: (cmd) /${interaction.commandName}`);
 
         try {
             await command.execute(interaction);

@@ -5,8 +5,7 @@ import { pool } from '../index.js';
 const handle = async (msg: Message) => {
     const author = msg.author.username;
     const { name: channel } = msg.channel as TextChannel;
-    const content = msg.content;
-    const ts = timestamp();
+    const ts = timestamp(true);
 
     console.log(`#${channel} ${ts} ${author}: ${content}`);
     const insert = 'INSERT INTO message (author, content, channel, timestamp) VALUES ($1, $2, $3, $4)';
