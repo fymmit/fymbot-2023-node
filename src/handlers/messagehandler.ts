@@ -5,6 +5,7 @@ import { pool } from '../index.js';
 const handle = async (msg: Message) => {
     const author = msg.author.username;
     const { name: channel } = msg.channel as TextChannel;
+    const { id, content } = msg;
     const ts = timestamp(true);
 
     console.log(`#${channel} ${ts} ${author}: ${content}`);
