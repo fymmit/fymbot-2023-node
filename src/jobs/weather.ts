@@ -24,6 +24,8 @@ export const register = async (client: Client, channelId: string, apiKey: string
         const data = await getWeather(url);
         sendWeather(client, channelId, data);
     });
+
+    console.log('Weather job registered');
 }
 
 const getWeather = async (url: string) => {
