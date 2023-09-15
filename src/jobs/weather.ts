@@ -18,10 +18,12 @@ interface IWeatherResponse {
     PrecipitationProbability: number;
 }
 
-export const register = async (client: Client, channelId: string, apiKey: string) => {
-    cron.schedule('0 8 * * *', async () => {
+export const register = (client: Client, channelId: string, apiKey: string) => {
+    cron.schedule('58 7 * * *', async () => {
+        console.log('Trying to do weather report');
         const url = `${baseUrl}?apikey=${apiKey}&metric=true`;
         const data = await getWeather(url);
+        console.log('Weather data length: ', data.length);
         sendWeather(client, channelId, data);
     });
 
